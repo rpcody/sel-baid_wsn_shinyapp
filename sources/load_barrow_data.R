@@ -3,19 +3,19 @@
 source("sources/WindRose.R")
 
 #### load and clean data from the four towers ####
-nodeAmetadata <- read.csv("data/Node_A_20141108.csv", skip = 1, 
+nodeAmetadata <- read.csv("data-current/Node_A_20141108.csv", skip = 1, 
                           stringsAsFactors = FALSE)[1:3,]
 headers <- names(nodeAmetadata)
 units <- nodeAmetadata[1,]
 stattype <- nodeAmetadata[2,]
 
-nodeA <- read.csv("data/Node_A_20141108.csv", skip = 4, stringsAsFactors = FALSE,
+nodeA <- read.csv("data-current/Node_A_20141108.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
-nodeB <- read.csv("data/Node_B_Table1.dat", skip = 3, stringsAsFactors = FALSE,
+nodeB <- read.csv("data-current/Node_B_20141108.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
-nodeC <- read.csv("data/Node_C_Table1.dat", skip = 3, stringsAsFactors = FALSE,
+nodeC <- read.csv("data-current/Node_C_20141108.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
-nodeD <- read.csv("data/Node_D_Table1.dat", skip = 3, stringsAsFactors = FALSE,
+nodeD <- read.csv("data-current/Node_D_20141108.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
 
 names(nodeA) <- headers
@@ -30,25 +30,52 @@ nodeD$node <- rep("D", nrow(nodeD))
 
 alldata <- rbind(nodeA, nodeB, nodeC, nodeD)
 
-alldata$TIMESTAMP <- as.POSIXct(alldata$TIMESTAMP, format = "%Y-%m-%d %H:%M:%S")
-alldata$WS_ms_TMx <- as.POSIXct(alldata$WS_ms_TMx, format = "%Y-%m-%d %H:%M:%S")
-alldata$WS_ms_TMn <- as.POSIXct(alldata$WS_ms_TMn, format = "%Y-%m-%d %H:%M:%S")
+alldata$TIMESTAMP <- as.POSIXct(alldata$TIMESTAMP, format = "%m/%d/%Y %H:%M")
+alldata$WS_ms_TMx <- as.POSIXct(alldata$WS_ms_TMx, format = "%m/%d/%Y %H:%M")
+alldata$WS_ms_TMn <- as.POSIXct(alldata$WS_ms_TMn, format = "%m/%d/%Y %H:%M")
 
-#### Make aggregations of the data - daily, weekly, and monthly averages ####
+nodes <- unique(alldata$node)
+
+#### Aggregate the data into daily, weekly, and monthly averages ####
 alldata$day <- cut(alldata$TIMESTAMP, "day")
-dailymeans <- ddply(alldata, .(day, node), function(df) colwise(mean, na.rm = TRUE)(df[,3:29])) 
-alldata$week <- cut(alldata$TIMESTAMP, "week")
-weeklymeans <- ddply(alldata, .(week, node), function(df) colwise(mean, na.rm = TRUE)(df[,3:29])) 
-alldata$month <- cut(alldata$TIMESTAMP, "month")
-monthlymeans <- ddply(alldata, .(month, node), function(df) colwise(mean, na.rm = TRUE)(df[,3:29])) 
+dailymeans <- ddply(alldata, .(day, node), function(df) colwise(mean, na.rm = TRUE)(df[,3:32])) 
+days <- unique(alldata$day)
+all_days_nodes <- merge(days, nodes, all = TRUE)
+dailymeans <- merge(dailymeans, all_days_nodes, by.x = c("day","node"), 
+                    by.y = c("x","y"), all = TRUE)
 
-#### aggregate the precipitation data into daily, weekly, and monthly totals ####
+alldata$week <- cut(alldata$TIMESTAMP, "week")
+weeklymeans <- ddply(alldata, .(week, node), function(df) colwise(mean, na.rm = TRUE)(df[,3:32])) 
+weeks <- unique(alldata$week)
+all_weeks_nodes <- merge(weeks, nodes, all = TRUE)
+weeklymeans <- merge(weeklymeans, all_weeks_nodes, by.x = c("week","node"), 
+                     by.y = c("x","y"), all = TRUE)
+
+
+alldata$month <- cut(alldata$TIMESTAMP, "month")
+monthlymeans <- ddply(alldata, .(month, node), function(df) colwise(mean, na.rm = TRUE)(df[,3:32])) 
+months <- unique(alldata$month)
+all_months_nodes <- merge(months, nodes, all = TRUE)
+monthlymeans <- merge(monthlymeans, all_months_nodes, by.x = c("month","node"), 
+                     by.y = c("x","y"), all = TRUE)
+
+#### Aggregate the precipitation data into daily, weekly, and monthly totals ####
 dailyppt <- ddply(alldata, .(day, node), function(df) sum(df[,16], na.rm = TRUE))
 names(dailyppt)[3] <-"Rain_mm_Tot"
+dailyppt <- merge(dailyppt, all_days_nodes, by.x = c("day","node"), 
+                    by.y = c("x","y"), all = TRUE)
+
+
 weeklyppt <- ddply(alldata, .(week, node), function(df) sum(df[,16], na.rm = TRUE))
 names(weeklyppt)[3] <-"Rain_mm_Tot"
+weeklyppt <- merge(weeklyppt, all_weeks_nodes, by.x = c("week","node"), 
+                     by.y = c("x","y"), all = TRUE)
+
 monthlyppt <- ddply(alldata, .(month, node), function(df) sum(df[,16], na.rm = TRUE))
 names(monthlyppt)[3] <-"Rain_mm_Tot"
+monthlyppt <- merge(monthlyppt, all_months_nodes, by.x = c("month","node"), 
+                      by.y = c("x","y"), all = TRUE)
+
 
 dailydata <- dailymeans
 dailydata$Rain_mm_Tot <- dailyppt$Rain_mm_Tot
@@ -72,11 +99,10 @@ windroses <- list()
 for(i in 1:length(levels(factor(d$yearmonth)))){
   p <- plot.windrose(d[which(d$monthInt == i), ],  
                      spd = "WS_ms_Avg", dir = "WindDir_D1_WVT", spdres = 2, 
-                     spdmin = 0, spdmax = max(d$WS_ms_Avg)+2,
+                     spdmin = 0, spdmax = max(d$WS_ms_Avg, na.rm = TRUE)+2,
                      dirres = 30, countmax = 20) 
   #, spdseq = c(0,3,6,12,15)) +
   pl <- print(p +
-                theme_bw()  +
                 ggtitle(paste("Daily averages,", levels(factor(d$yearmonth))[i]))  +
                 xlab("") + ylab("Count") +
                 facet_wrap(~node, nrow = 2, ncol = 2) +
@@ -92,7 +118,10 @@ for(i in 1:length(levels(factor(d$yearmonth)))){
                       axis.text.y = element_blank(),
                       strip.text.x = element_text(size=16, face = "bold"),
                       strip.background = element_rect(colour="darkblue", fill="white"),
-                      legend.position = "left"))
+                      legend.position = "left",
+                      panel.grid.major.y = element_line(size = .5, colour = "gray80"),
+                      panel.grid.major.x = element_line(size = .5, colour = "gray80"),
+                      panel.background = element_rect(fill = "white")))
   windroses[[i]] <- pl
 }
 
