@@ -30,7 +30,3 @@ shinyUI(navbarPage(
                          animate = animationOptions(interval = 4000, loop = TRUE))))
   ))
 
-
-
-# tags$head(tags$style(type="text/css", ".jslider {max-width: 500px; }")),
-# plotOutput(outputId = 'facetted_windrose', width = "1800px", height = "900px")),
