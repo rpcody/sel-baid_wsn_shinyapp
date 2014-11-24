@@ -1,0 +1,14 @@
+auto.snapshot: TRUE
+use.cache: FALSE
+print.banner.on.startup: auto
+vcs.ignore.lib: FALSE
+vcs.ignore.src: FALSE
+external.packages:
+    shiny
+    scales
+    plyr
+    ggplot2
+    grid
+    reshape2
+local.repos: 
+load.external.packages.on.startup: TRUE

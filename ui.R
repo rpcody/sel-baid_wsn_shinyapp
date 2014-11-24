@@ -7,10 +7,12 @@ library(grid)
 library(reshape2)
 source("sources/load_barrow_data.R")
 
+
 shinyUI(navbarPage(
   
   title = "Barrow Met Data",
   tabPanel("Air Temp.", plotOutput("dailyAirTempPlot", height = "700px")),
+  tabPanel("Relative Humidity", plotOutput("dailyRHPlot", height = "700px")),
   tabPanel("Soil Temp.", plotOutput("dailyAvgSoilTempPlot", height = "700px")),
   tabPanel("Soil VWC", plotOutput("dailyVWCPlot", height = "700px")),
   tabPanel("Soil EC", plotOutput("dailySoilECPlot", height = "700px")),
@@ -28,7 +30,3 @@ shinyUI(navbarPage(
                          animate = animationOptions(interval = 4000, loop = TRUE))))
   ))
 
-
-
-# tags$head(tags$style(type="text/css", ".jslider {max-width: 500px; }")),
-# plotOutput(outputId = 'facetted_windrose', width = "1800px", height = "900px")),
