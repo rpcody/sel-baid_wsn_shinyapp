@@ -1,6 +1,12 @@
-# WindRose.R
-#Written by Andy Clifton, https://stackoverflow.com/users/2514568/andy-clifton
+#WindRose.R
+
+#Originally written by Andy Clifton, https://stackoverflow.com/users/2514568/andy-clifton
 #and posted at https://stackoverflow.com/questions/17266780/wind-rose-with-ggplot-r/17266781#17266781
+
+#Modified to suit the visualization requirements for the wind data from the 
+#Barrow sensor network.
+
+
 require(ggplot2)
 require(RColorBrewer)
 
