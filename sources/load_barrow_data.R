@@ -3,19 +3,19 @@
 source("sources/WindRose.R")
 
 #### load and clean data from the four towers ####
-nodeAmetadata <- read.csv("data-current/Node_A_20141108.csv", skip = 1, 
+nodeAmetadata <- read.csv("data-current/Node_A.csv", skip = 1, 
                           stringsAsFactors = FALSE)[1:3,]
 headers <- names(nodeAmetadata)
 units <- nodeAmetadata[1,]
 stattype <- nodeAmetadata[2,]
 
-nodeA <- read.csv("data-current/Node_A_20141108.csv", skip = 4, stringsAsFactors = FALSE,
+nodeA <- read.csv("data-current/Node_A.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
-nodeB <- read.csv("data-current/Node_B_20141108.csv", skip = 4, stringsAsFactors = FALSE,
+nodeB <- read.csv("data-current/Node_B.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
-nodeC <- read.csv("data-current/Node_C_20141108.csv", skip = 4, stringsAsFactors = FALSE,
+nodeC <- read.csv("data-current/Node_C.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
-nodeD <- read.csv("data-current/Node_D_20141108.csv", skip = 4, stringsAsFactors = FALSE,
+nodeD <- read.csv("data-current/Node_D.csv", skip = 4, stringsAsFactors = FALSE,
                   na.strings = c("7999","NAN"))
 
 names(nodeA) <- headers
