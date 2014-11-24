@@ -5,7 +5,7 @@ library(plyr)
 library(ggplot2)
 library(grid)
 library(reshape2)
-#source("sources/load_barrow_data.R")
+source("sources/load_barrow_data.R")
 
 
 shinyUI(navbarPage(
